@@ -23,6 +23,9 @@
     @if (session('success'))
         <div class="success-message" role="status">{{ session('success') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="error-message" role="alert">{{ $errors->first() }}</div>
+    @endif
 
     <div class="students-table-wrap">
         <table class="students-table subjects-table">

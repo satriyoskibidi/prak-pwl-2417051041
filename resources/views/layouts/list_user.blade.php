@@ -32,6 +32,9 @@
     @if (session('success'))
         <div class="success-message" role="status">{{ session('success') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="error-message" role="alert">{{ $errors->first() }}</div>
+    @endif
 
     <div class="students-table-wrap">
         <table class="students-table">
@@ -47,7 +50,7 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr>
-                        <td class="id-column">{{ $user->id }}</td>
+                        <td class="id-column" title="{{ $user->id }}">{{ \Illuminate\Support\Str::limit($user->id, 8, '') }}</td>
                         <td class="name-column">{{ $user->nama }}</td>
                         <td class="npm-column">{{ $user->npm }}</td>
                         <td class="class-column">{{ $user->kelas?->nama_kelas }}</td>
@@ -105,11 +108,11 @@
 <div class="modal fade student-modal" id="studentModal" tabindex="-1" aria-labelledby="studentModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="studentForm" action="{{ route('user.store') }}" method="POST" data-store-action="{{ route('user.store') }}">
+            <form id="studentForm" action="{{ old('student_id') ? route('user.update', old('student_id')) : route('user.store') }}" method="POST" data-store-action="{{ route('user.store') }}">
                 @csrf
                 <input type="hidden" name="student_id" id="studentId" value="{{ old('student_id') }}">
                 <div class="modal-body">
-                    <h2 id="studentModalTitle">Add Student</h2>
+                    <h2 id="studentModalTitle">{{ old('student_id') ? 'Edit Student' : 'Add Student' }}</h2>
 
                     <div class="student-field">
                         <label for="studentName">NAME</label>
@@ -136,7 +139,7 @@
 
                     <div class="modal-actions">
                         <button class="modal-cancel" type="button" data-bs-dismiss="modal">CANCEL</button>
-                        <button class="modal-submit" id="studentSubmit" type="submit">ADD STUDENT</button>
+                        <button class="modal-submit" id="studentSubmit" type="submit">{{ old('student_id') ? 'SAVE CHANGES' : 'ADD STUDENT' }}</button>
                     </div>
                 </div>
             </form>
@@ -171,6 +174,11 @@
             methodField.remove();
         }
     });
+
+    @if (old('student_id'))
+        methodField.value = 'PUT';
+        studentForm.append(methodField);
+    @endif
 
     @if ($errors->any() || request()->boolean('add'))
         bootstrap.Modal.getOrCreateInstance(studentModal).show();
